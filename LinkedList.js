@@ -1,4 +1,5 @@
 // Necessary Imports (you will need to use this)
+const fs = require('fs').promises;
 const { Student } = require('./Student')
 
 /**
@@ -37,6 +38,9 @@ class LinkedList {
    */
   constructor() {
     // TODO
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
   }
 
   /**
@@ -49,6 +53,17 @@ class LinkedList {
    */
   addStudent(newStudent) {
     // TODO
+    const node = new Node(newStudent);
+
+    if (this.head === null) {
+      this.head = node;
+      this.tail = node;
+    } else {
+      this.tail.next = node;
+      this.tail = node;
+    }
+
+    this.length++;
   }
 
   /**
@@ -61,6 +76,26 @@ class LinkedList {
    */
   removeStudent(email) {
     // TODO
+    if (!this.head) return;
+
+    let current = this.head; //point the first item as current
+    let prev = null; // no previous
+
+    // loop to find the email
+    while (current && current.data.getEmail() !== email) {
+      prev = current;
+      current = current.next;
+    }
+    if (!current) return; // if the loop ends without finding the email
+    if (prev === null) { // if the student is the first item
+      this.head = current.next; // make the next item head
+    } else {
+      prev.next = current.next; // if the deleted in the middle point the prev with next
+    }
+    if (current === this.tail) { // id the deleted it the end make the previous item the tail 
+      this.tail = prev;
+    }
+    this.length--;
   }
 
   /**
@@ -70,6 +105,13 @@ class LinkedList {
    */
   findStudent(email) {
     // TODO
+    let current = this.head;
+    while (current) {
+      if (current.data.getEmail() === email) {
+        return current.data;
+      }
+      current = current.next;
+    }
     return -1
   }
 
@@ -80,8 +122,14 @@ class LinkedList {
    */
   #clearStudents() {
     // TODO
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
   }
 
+  clearStudents() {
+    this.#clearStudents();
+  }
   /**
    * REQUIRES:  None
    * EFFECTS:   None
@@ -92,7 +140,13 @@ class LinkedList {
    */
   displayStudents() {
     // TODO
-    return "";
+    let current = this.head;
+    let names = '';
+    while (current) {
+      names += `${names && ', '}${current.data.getName()}`
+      current = current.next;
+    }
+    return names;
   }
 
   /**
@@ -102,7 +156,14 @@ class LinkedList {
    */
   #sortStudentsByName() {
     // TODO
-    return [];
+    const students = [];
+    let current = this.head;
+    while (current) {
+      students.push(current.data);
+      current = current.next;
+    }
+    students.sort((a, b) => a.getName().localeCompare(b.getName()));
+    return students;
   }
 
   /**
@@ -114,7 +175,8 @@ class LinkedList {
    */
   filterBySpecialization(specialization) {
     // TODO
-    return [];
+    const sorted = this.#sortStudentsByName();
+    return sorted.filter(el => el.getSpecialization() === specialization);
   }
 
   /**
@@ -126,7 +188,17 @@ class LinkedList {
    */
   filterByMinAge(minAge) {
     // TODO
-    return [];
+    const sorted = this.#sortStudentsByName();
+    return sorted.filter(el => el.getYear() >= minAge);
+  }
+
+  #checkFileName(fileName) {
+    const fileNameRegex = /^[\w-]+\.[\w]+$/;
+    if (!fileNameRegex.test(fileName.trim())) {
+      throw new Error(
+        "Invalid file name!"
+      );
+    }
   }
 
   /**
@@ -136,6 +208,21 @@ class LinkedList {
    */
   async saveToJson(fileName) {
     // TODO
+    this.#checkFileName(fileName)
+
+    const studentsArray = [];
+    let current = this.head;
+    while (current) {
+      const currentStudentData = current.data;
+      studentsArray.push({
+        name: currentStudentData.getName(),
+        year: currentStudentData.getYear(),
+        email: currentStudentData.getEmail(),
+        specialization: currentStudentData.getSpecialization()
+      });
+      current = current.next;
+    }
+    await fs.writeFile(fileName, JSON.stringify(studentsArray, null, 2));
   }
 
   /**
@@ -147,8 +234,18 @@ class LinkedList {
    */
   async loadFromJSON(fileName) {
     // TODO
-  }
+    this.#checkFileName(fileName)
 
+    const data = await fs.readFile(fileName, 'utf-8');
+    const studentsArray = JSON.parse(data);
+
+    this.#clearStudents();
+
+    for (const el of studentsArray) {
+      const student = new Student(el.name, el.year, el.email, el.specialization);
+      this.addStudent(student);
+    }
+  }
 }
 
 module.exports = { LinkedList }
