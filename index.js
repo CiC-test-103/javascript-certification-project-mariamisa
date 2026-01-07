@@ -49,7 +49,7 @@ async function handleCommand(command) {
         // --------> WRITE YOUR CODE BELOW
       const student = new Student(name, +year, email, specialization)
       studentManagementSystem.addStudent(student)
-      studentManagementSystem.displayStudents()
+      console.log(studentManagementSystem.displayStudents())
         // --------> WRITE YOUR CODE ABOVE
         break;
 
@@ -64,7 +64,8 @@ async function handleCommand(command) {
        */
       console.log('Removing student...')
       // --------> WRITE YOUR CODE BELOW
-      studentManagementSystem.removeStudent(email)
+      studentManagementSystem.removeStudent(args[0])
+      console.log(studentManagementSystem.displayStudents())
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -77,7 +78,7 @@ async function handleCommand(command) {
        */
       console.log('Displaying students...')
       // --------> WRITE YOUR CODE BELOW
-      studentManagementSystem.displayStudents()
+      console.log(studentManagementSystem.displayStudents())
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -93,7 +94,12 @@ async function handleCommand(command) {
        */
       console.log('Finding student...')
       // --------> WRITE YOUR CODE BELOW
-      studentManagementSystem.findStudent(email)
+      const result = studentManagementSystem.findStudent(args[0])
+      if (result !== -1) {
+        console.log(result.getString())
+      } else {
+        console.log("Student does not exist")
+      }
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -108,7 +114,7 @@ async function handleCommand(command) {
        */
       console.log('Saving data...')
       // --------> WRITE YOUR CODE BELOW
-      studentManagementSystem.saveToJson("students")
+      studentManagementSystem.saveToJson(args[0])
       // --------> WRITE YOUR CODE ABOVE
 
     case "load":
@@ -122,7 +128,8 @@ async function handleCommand(command) {
        */
       console.log('Loading data...')
       // --------> WRITE YOUR CODE BELOW
-      studentManagementSystem.loadFromJSON("students")
+      await studentManagementSystem.loadFromJSON(args[0])
+      console.log(studentManagementSystem.displayStudents())
       // --------> WRITE YOUR CODE ABOVE
       break;
 

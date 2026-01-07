@@ -129,6 +129,7 @@ class LinkedList {
 
   clearStudents() {
     this.#clearStudents();
+    console.log("data cleared.")
   }
   /**
    * REQUIRES:  None
@@ -146,7 +147,7 @@ class LinkedList {
       names += `${names && ', '}${current.data.getName()}`
       current = current.next;
     }
-    return names;
+    return names ? names : "no students yet!";
   }
 
   /**
@@ -192,8 +193,8 @@ class LinkedList {
     return sorted.filter(el => el.getYear() >= minAge);
   }
 
-  #checkFileName(fileName) {
-    const fileNameRegex = /^[\w-]+\.[\w]+$/;
+  #isValidJsonFile(fileName) {
+    const fileNameRegex = /^\s*[\w-]+\.json\s*$/;
     if (!fileNameRegex.test(fileName.trim())) {
       throw new Error(
         "Invalid file name!"
@@ -208,7 +209,7 @@ class LinkedList {
    */
   async saveToJson(fileName) {
     // TODO
-    this.#checkFileName(fileName)
+    this.#isValidJsonFile(fileName)
 
     const studentsArray = [];
     let current = this.head;
@@ -223,6 +224,7 @@ class LinkedList {
       current = current.next;
     }
     await fs.writeFile(fileName, JSON.stringify(studentsArray, null, 2));
+    return "file created successfully"
   }
 
   /**
@@ -234,7 +236,7 @@ class LinkedList {
    */
   async loadFromJSON(fileName) {
     // TODO
-    this.#checkFileName(fileName)
+    this.#isValidJsonFile(fileName)
 
     const data = await fs.readFile(fileName, 'utf-8');
     const studentsArray = JSON.parse(data);
@@ -245,6 +247,7 @@ class LinkedList {
       const student = new Student(el.name, el.year, el.email, el.specialization);
       this.addStudent(student);
     }
+    return "data loaded successfully"
   }
 }
 
