@@ -87,12 +87,12 @@ class LinkedList {
       current = current.next;
     }
     if (!current) return; // if the loop ends without finding the email
-    if (prev === null) { // if the student is the first item
+    if (!prev) { // if the student is the first item
       this.head = current.next; // make the next item head
     } else {
       prev.next = current.next; // if the deleted in the middle point the prev with next
     }
-    if (current === this.tail) { // id the deleted it the end make the previous item the tail 
+    if (current === this.tail) { // make the previous item the tail 
       this.tail = prev;
     }
     this.length--;
@@ -147,7 +147,19 @@ class LinkedList {
       names += `${names && ', '}${current.data.getName()}`
       current = current.next;
     }
-    return names ? names : "no students yet!";
+    return names || "no students yet!";
+  }
+  /** 
+   * convert the linked list into array of students
+  */
+  #studentsLinkedListToArray() {
+    const students = []
+    let current = this.head;
+    while (current) {
+      students.push(current.data)
+      current = current.next
+    }
+    return students
   }
 
   /**
@@ -157,14 +169,8 @@ class LinkedList {
    */
   #sortStudentsByName() {
     // TODO
-    const students = [];
-    let current = this.head;
-    while (current) {
-      students.push(current.data);
-      current = current.next;
-    }
-    students.sort((a, b) => a.getName().localeCompare(b.getName()));
-    return students;
+    const students = this.#studentsLinkedListToArray()
+    return students.sort((a, b) => a.getName().localeCompare(b.getName()));
   }
 
   /**
@@ -176,8 +182,7 @@ class LinkedList {
    */
   filterBySpecialization(specialization) {
     // TODO
-    const sorted = this.#sortStudentsByName();
-    return sorted.filter(el => el.getSpecialization() === specialization);
+    return this.#sortStudentsByName().filter(el => el.getSpecialization() === specialization);
   }
 
   /**
@@ -189,8 +194,7 @@ class LinkedList {
    */
   filterByMinAge(minAge) {
     // TODO
-    const sorted = this.#sortStudentsByName();
-    return sorted.filter(el => el.getYear() >= minAge);
+    return this.#sortStudentsByName().filter(el => el.getYear() >= minAge);
   }
 
   #isValidJsonFile(fileName) {
@@ -243,8 +247,8 @@ class LinkedList {
 
     this.#clearStudents();
 
-    for (const el of studentsArray) {
-      const student = new Student(el.name, el.year, el.email, el.specialization);
+    for (const { name, year, email, specialization } of studentsArray) {
+      const student = new Student(name, year, email, specialization);
       this.addStudent(student);
     }
     return "data loaded successfully"
